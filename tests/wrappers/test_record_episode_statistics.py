@@ -12,16 +12,16 @@ def test_record_episode_statistics(env_id, deque_size):
     env = gym.make(env_id, disable_env_checker=True)
     env = RecordEpisodeStatistics(env, deque_size)
 
-    for n in range(5):
+    for _ in range(5):
         env.reset()
         assert env.episode_returns is not None and env.episode_lengths is not None
         assert env.episode_returns[0] == 0.0
         assert env.episode_lengths[0] == 0
-        for t in range(env.spec.max_episode_steps):
+        for _ in range(env.spec.max_episode_steps):
             _, _, terminated, truncated, info = env.step(env.action_space.sample())
             if terminated or truncated:
                 assert "episode" in info
-                assert all([item in info["episode"] for item in ["r", "l", "t"]])
+                assert all(item in info["episode"] for item in ["r", "l", "t"])
                 break
     assert len(env.return_queue) == deque_size
     assert len(env.length_queue) == deque_size
@@ -60,7 +60,7 @@ def test_record_episode_statistics_with_vectorenv(num_envs, asynchronous):
             assert "episode" in infos
             assert "_episode" in infos
             assert all(infos["_episode"] == np.bitwise_or(terminateds, truncateds))
-            assert all([item in infos["episode"] for item in ["r", "l", "t"]])
+            assert all(item in infos["episode"] for item in ["r", "l", "t"])
             break
         else:
             assert "episode" not in infos

@@ -146,26 +146,18 @@ class Continuous_MountainCarEnv(gym.Env):
         force = min(max(action[0], self.min_action), self.max_action)
 
         velocity += force * self.power - 0.0025 * math.cos(3 * position)
-        if velocity > self.max_speed:
-            velocity = self.max_speed
-        if velocity < -self.max_speed:
-            velocity = -self.max_speed
+        velocity = min(velocity, self.max_speed)
+        velocity = max(velocity, -self.max_speed)
         position += velocity
-        if position > self.max_position:
-            position = self.max_position
-        if position < self.min_position:
-            position = self.min_position
+        position = min(position, self.max_position)
+        position = max(position, self.min_position)
         if position == self.min_position and velocity < 0:
             velocity = 0
 
         # Convert a possible numpy bool to a Python bool.
-        terminated = bool(
-            position >= self.goal_position and velocity >= self.goal_velocity
-        )
+        terminated = position >= self.goal_position and velocity >= self.goal_velocity
 
-        reward = 0
-        if terminated:
-            reward = 100.0
+        reward = 100.0 if terminated else 0
         reward -= math.pow(action[0], 2) * 0.1
 
         self.state = np.array([position, velocity], dtype=np.float32)

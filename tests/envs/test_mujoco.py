@@ -22,7 +22,7 @@ def verify_environments_match(
 
     np.testing.assert_allclose(old_reset_obs, new_reset_obs)
 
-    for i in range(num_actions):
+    for _ in range(num_actions):
         action = old_env.action_space.sample()
         old_obs, old_reward, old_terminated, old_truncated, old_info = old_env.step(
             action
@@ -72,9 +72,7 @@ def test_obs_space_mujoco_environments(env_spec: EnvSpec):
         step_obs
     ), f"Obseravtion returned by step(action) of {env_spec.id} is not contained in the default observation space {env.observation_space}."
 
-    if env_spec.name in EXCLUDE_POS_FROM_OBS and (
-        env_spec.version == 4 or env_spec.version == 3
-    ):
+    if env_spec.name in EXCLUDE_POS_FROM_OBS and env_spec.version in [4, 3]:
         env = env_spec.make(
             disable_env_checker=True, exclude_current_positions_from_observation=False
         )

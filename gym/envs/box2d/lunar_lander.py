@@ -57,10 +57,7 @@ class ContactDetector(contactListener):
         self.env = env
 
     def BeginContact(self, contact):
-        if (
-            self.env.lander == contact.fixtureA.body
-            or self.env.lander == contact.fixtureB.body
-        ):
+        if self.env.lander in [contact.fixtureA.body, contact.fixtureB.body]:
             self.env.game_over = True
         for i in range(2):
             if self.env.legs[i] in [contact.fixtureA.body, contact.fixtureB.body]:
@@ -208,11 +205,11 @@ class LunarLander(gym.Env, EzPickle):
         )
 
         assert (
-            -12.0 < gravity and gravity < 0.0
+            -12.0 < gravity < 0.0
         ), f"gravity (current value: {gravity}) must be between -12 and 0"
         self.gravity = gravity
 
-        if 0.0 > wind_power or wind_power > 20.0:
+        if wind_power < 0.0 or wind_power > 20.0:
             warnings.warn(
                 colorize(
                     f"WARN: wind_power value is recommended to be between 0.0 and 20.0, (current value: {wind_power})",
@@ -221,7 +218,7 @@ class LunarLander(gym.Env, EzPickle):
             )
         self.wind_power = wind_power
 
-        if 0.0 > turbulence_power or turbulence_power > 2.0:
+        if turbulence_power < 0.0 or turbulence_power > 2.0:
             warnings.warn(
                 colorize(
                     f"WARN: turbulence_power value is recommended to be between 0.0 and 2.0, (current value: {turbulence_power})",
@@ -446,8 +443,10 @@ class LunarLander(gym.Env, EzPickle):
 
         # Update wind
         assert self.lander is not None, "You forgot to call reset()"
-        if self.enable_wind and not (
-            self.legs[0].ground_contact or self.legs[1].ground_contact
+        if (
+            self.enable_wind
+            and not self.legs[0].ground_contact
+            and not self.legs[1].ground_contact
         ):
             # the function used for wind is tanh(sin(2 k x) + sin(pi k x)),
             # which is proven to never be periodic, k = 0.01
@@ -555,8 +554,8 @@ class LunarLander(gym.Env, EzPickle):
 
         self.world.Step(1.0 / FPS, 6 * 30, 2 * 30)
 
-        pos = self.lander.position
         vel = self.lander.linearVelocity
+        pos = self.lander.position
         state = [
             (pos.x - VIEWPORT_W / SCALE / 2) / (VIEWPORT_W / SCALE / 2),
             (pos.y - (self.helipad_y + LEG_DOWN / SCALE)) / (VIEWPORT_H / SCALE / 2),
@@ -644,9 +643,7 @@ class LunarLander(gym.Env, EzPickle):
         self._clean_particles(False)
 
         for p in self.sky_polys:
-            scaled_poly = []
-            for coord in p:
-                scaled_poly.append((coord[0] * SCALE, coord[1] * SCALE))
+            scaled_poly = [(coord[0] * SCALE, coord[1] * SCALE) for coord in p]
             pygame.draw.polygon(self.surf, (0, 0, 0), scaled_poly)
             gfxdraw.aapolygon(self.surf, scaled_poly, (0, 0, 0))
 
@@ -746,10 +743,8 @@ def heuristic(env, s):
     """
 
     angle_targ = s[0] * 0.5 + s[2] * 1.0  # angle should point towards center
-    if angle_targ > 0.4:
-        angle_targ = 0.4  # more than 0.4 radians (22 degrees) is bad
-    if angle_targ < -0.4:
-        angle_targ = -0.4
+    angle_targ = min(angle_targ, 0.4)
+    angle_targ = max(angle_targ, -0.4)
     hover_targ = 0.55 * np.abs(
         s[0]
     )  # target y should be proportional to horizontal offset

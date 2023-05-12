@@ -115,10 +115,7 @@ class PixelObservationWrapper(gym.ObservationWrapper):
             raise ValueError("Unsupported observation space structure.")
 
         if not pixels_only:
-            # Make sure that now keys in the `pixel_keys` overlap with
-            # `observation_keys`
-            overlapping_keys = set(pixel_keys) & set(invalid_keys)
-            if overlapping_keys:
+            if overlapping_keys := set(pixel_keys) & set(invalid_keys):
                 raise ValueError(
                     f"Duplicate or reserved pixel keys {overlapping_keys!r}."
                 )
@@ -171,8 +168,7 @@ class PixelObservationWrapper(gym.ObservationWrapper):
         Returns:
             The updated pixel observations
         """
-        pixel_observation = self._add_pixel_observation(observation)
-        return pixel_observation
+        return self._add_pixel_observation(observation)
 
     def _add_pixel_observation(self, wrapped_observation):
         if self._pixels_only:

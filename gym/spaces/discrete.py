@@ -35,8 +35,8 @@ class Discrete(Space[int]):
         assert isinstance(n, (int, np.integer))
         assert n > 0, "n (counts) have to be positive"
         assert isinstance(start, (int, np.integer))
-        self.n = int(n)
-        self.start = int(start)
+        self.n = n
+        self.start = start
         super().__init__((), np.int64, seed)
 
     @property

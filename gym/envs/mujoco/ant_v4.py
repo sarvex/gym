@@ -249,34 +249,27 @@ class AntEnv(MujocoEnv, utils.EzPickle):
         )
 
     def control_cost(self, action):
-        control_cost = self._ctrl_cost_weight * np.sum(np.square(action))
-        return control_cost
+        return self._ctrl_cost_weight * np.sum(np.square(action))
 
     @property
     def contact_forces(self):
         raw_contact_forces = self.data.cfrc_ext
         min_value, max_value = self._contact_force_range
-        contact_forces = np.clip(raw_contact_forces, min_value, max_value)
-        return contact_forces
+        return np.clip(raw_contact_forces, min_value, max_value)
 
     @property
     def contact_cost(self):
-        contact_cost = self._contact_cost_weight * np.sum(
-            np.square(self.contact_forces)
-        )
-        return contact_cost
+        return self._contact_cost_weight * np.sum(np.square(self.contact_forces))
 
     @property
     def is_healthy(self):
         state = self.state_vector()
         min_z, max_z = self._healthy_z_range
-        is_healthy = np.isfinite(state).all() and min_z <= state[2] <= max_z
-        return is_healthy
+        return np.isfinite(state).all() and min_z <= state[2] <= max_z
 
     @property
     def terminated(self):
-        terminated = not self.is_healthy if self._terminate_when_unhealthy else False
-        return terminated
+        return not self.is_healthy if self._terminate_when_unhealthy else False
 
     def step(self, action):
         xy_position_before = self.get_body_com("torso")[:2].copy()
@@ -343,9 +336,7 @@ class AntEnv(MujocoEnv, utils.EzPickle):
         )
         self.set_state(qpos, qvel)
 
-        observation = self._get_obs()
-
-        return observation
+        return self._get_obs()
 
     def viewer_setup(self):
         assert self.viewer is not None

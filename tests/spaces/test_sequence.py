@@ -31,7 +31,7 @@ def test_sample():
 
     sample = space.sample(mask=(np.array([3, 4, 5]), None))
     assert sample in space
-    assert len(sample) in [3, 4, 5]
+    assert len(sample) in {3, 4, 5}
 
     with pytest.raises(
         AssertionError,

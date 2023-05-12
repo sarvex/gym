@@ -139,15 +139,14 @@ class Tuple(Space[tuple], CollectionSequence):
 
     def from_jsonable(self, sample_n) -> list:
         """Convert a JSONable data type to a batch of samples from this space."""
-        return [
-            sample
-            for sample in zip(
+        return list(
+            zip(
                 *[
                     space.from_jsonable(sample_n[i])
                     for i, space in enumerate(self.spaces)
                 ]
             )
-        ]
+        )
 
     def __getitem__(self, index: int) -> Space:
         """Get the subspace at specific `index`."""

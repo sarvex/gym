@@ -41,7 +41,7 @@ def test_transform_reward(env_id):
     _, wrapped_reward, _, _, _ = wrapped_env.step(action)
 
     assert abs(wrapped_reward) < abs(reward)
-    assert wrapped_reward == -0.0005 or wrapped_reward == 0.0002
+    assert wrapped_reward in [-0.0005, 0.0002]
     del env, wrapped_env
 
     # use case #3: sign

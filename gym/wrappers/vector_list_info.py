@@ -103,9 +103,9 @@ class VectorListInfo(gym.Wrapper):
         episode_statistics_mask = infos.pop("_episode")
         for i, has_info in enumerate(episode_statistics_mask):
             if has_info:
-                list_info[i]["episode"] = {}
-                list_info[i]["episode"]["r"] = episode_statistics["r"][i]
-                list_info[i]["episode"]["l"] = episode_statistics["l"][i]
-                list_info[i]["episode"]["t"] = episode_statistics["t"][i]
-
+                list_info[i]["episode"] = {
+                    "r": episode_statistics["r"][i],
+                    "l": episode_statistics["l"][i],
+                    "t": episode_statistics["t"][i],
+                }
         return list_info

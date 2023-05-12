@@ -116,11 +116,7 @@ class Graph(Space):
             num_nodes > 0
         ), f"The number of nodes is expected to be greater than 0, actual value: {num_nodes}"
 
-        if mask is not None:
-            node_space_mask, edge_space_mask = mask
-        else:
-            node_space_mask, edge_space_mask = None, None
-
+        node_space_mask, edge_space_mask = mask if mask is not None else (None, None)
         # we only have edges when we have at least 2 nodes
         if num_edges is None:
             if num_nodes > 1:
@@ -162,29 +158,30 @@ class Graph(Space):
 
     def contains(self, x: GraphInstance) -> bool:
         """Return boolean specifying if x is a valid member of this space."""
-        if isinstance(x, GraphInstance):
-            # Checks the nodes
-            if isinstance(x.nodes, np.ndarray):
-                if all(node in self.node_space for node in x.nodes):
-                    # Check the edges and edge links which are optional
-                    if isinstance(x.edges, np.ndarray) and isinstance(
-                        x.edge_links, np.ndarray
-                    ):
-                        assert x.edges is not None
-                        assert x.edge_links is not None
-                        if self.edge_space is not None:
-                            if all(edge in self.edge_space for edge in x.edges):
-                                if np.issubdtype(x.edge_links.dtype, np.integer):
-                                    if x.edge_links.shape == (len(x.edges), 2):
-                                        if np.all(
-                                            np.logical_and(
-                                                x.edge_links >= 0,
-                                                x.edge_links < len(x.nodes),
-                                            )
-                                        ):
-                                            return True
-                    else:
-                        return x.edges is None and x.edge_links is None
+        if (
+            isinstance(x, GraphInstance)
+            and isinstance(x.nodes, np.ndarray)
+            and all(node in self.node_space for node in x.nodes)
+        ):
+            if not isinstance(x.edges, np.ndarray) or not isinstance(
+                x.edge_links, np.ndarray
+            ):
+                return x.edges is None and x.edge_links is None
+            assert x.edges is not None
+            assert x.edge_links is not None
+            if (
+                self.edge_space is not None
+                and all(edge in self.edge_space for edge in x.edges)
+                and np.issubdtype(x.edge_links.dtype, np.integer)
+                and x.edge_links.shape == (len(x.edges), 2)
+                and np.all(
+                    np.logical_and(
+                        x.edge_links >= 0,
+                        x.edge_links < len(x.nodes),
+                    )
+                )
+            ):
+                return True
         return False
 
     def __repr__(self) -> str:
@@ -210,8 +207,7 @@ class Graph(Space):
         # serialize as list of dicts
         ret_n = []
         for sample in sample_n:
-            ret = {}
-            ret["nodes"] = sample.nodes.tolist()
+            ret = {"nodes": sample.nodes.tolist()}
             if sample.edges is not None:
                 ret["edges"] = sample.edges.tolist()
                 ret["edge_links"] = sample.edge_links.tolist()

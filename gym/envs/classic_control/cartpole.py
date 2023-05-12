@@ -159,7 +159,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
         self.state = (x, x_dot, theta, theta_dot)
 
-        terminated = bool(
+        terminated = (
             x < -self.x_threshold
             or x > self.x_threshold
             or theta < -self.theta_threshold_radians

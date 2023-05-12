@@ -250,8 +250,7 @@ class MuJocoPyEnv(BaseMujocoEnv):
                 camera_name = "track"
 
             if camera_id is None and camera_name in self.model._camera_name2id:
-                if camera_name in self.model._camera_name2id:
-                    camera_id = self.model.camera_name2id(camera_name)
+                camera_id = self.model.camera_name2id(camera_name)
 
                 self._get_viewer(self.render_mode).render(
                     width, height, camera_id=camera_id

@@ -238,8 +238,7 @@ class Dict(Space[TypingDict[str, Space]], Mapping):
         }
 
         n_elements = len(next(iter(dict_of_list.values())))
-        result = [
+        return [
             OrderedDict({key: value[n] for key, value in dict_of_list.items()})
             for n in range(n_elements)
         ]
-        return result

@@ -32,24 +32,21 @@ class PassiveEnvChecker(gym.Wrapper):
 
     def step(self, action: ActType):
         """Steps through the environment that on the first call will run the `passive_env_step_check`."""
-        if self.checked_step is False:
-            self.checked_step = True
-            return env_step_passive_checker(self.env, action)
-        else:
+        if self.checked_step is not False:
             return self.env.step(action)
+        self.checked_step = True
+        return env_step_passive_checker(self.env, action)
 
     def reset(self, **kwargs):
         """Resets the environment that on the first call will run the `passive_env_reset_check`."""
-        if self.checked_reset is False:
-            self.checked_reset = True
-            return env_reset_passive_checker(self.env, **kwargs)
-        else:
+        if self.checked_reset is not False:
             return self.env.reset(**kwargs)
+        self.checked_reset = True
+        return env_reset_passive_checker(self.env, **kwargs)
 
     def render(self, *args, **kwargs):
         """Renders the environment that on the first call will run the `passive_env_render_check`."""
-        if self.checked_render is False:
-            self.checked_render = True
-            return env_render_passive_checker(self.env, *args, **kwargs)
-        else:
+        if self.checked_render is not False:
             return self.env.render(*args, **kwargs)
+        self.checked_render = True
+        return env_render_passive_checker(self.env, *args, **kwargs)

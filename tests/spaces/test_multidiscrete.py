@@ -10,8 +10,8 @@ def test_multidiscrete_as_tuple():
 
     assert space.shape == (3,)
     assert space[0] == Discrete(3)
-    assert space[0:1] == MultiDiscrete([3])
-    assert space[0:2] == MultiDiscrete([3, 4])
+    assert space[:1] == MultiDiscrete([3])
+    assert space[:2] == MultiDiscrete([3, 4])
     assert space[:] == space and space[:] is not space
 
     # 2D multi-discrete
@@ -20,7 +20,7 @@ def test_multidiscrete_as_tuple():
     assert space.shape == (2, 3)
     assert space[0, 1] == Discrete(4)
     assert space[0] == MultiDiscrete([3, 4, 5])
-    assert space[0:1] == MultiDiscrete([[3, 4, 5]])
+    assert space[:1] == MultiDiscrete([[3, 4, 5]])
     assert space[0:2, :] == MultiDiscrete([[3, 4, 5], [6, 7, 8]])
     assert space[:, 0:1] == MultiDiscrete([[3], [6]])
     assert space[0:2, 0:2] == MultiDiscrete([[3, 4], [6, 7]])
@@ -34,8 +34,8 @@ def test_multidiscrete_subspace_reproducibility():
     space.seed()
 
     assert data_equivalence(space[0].sample(), space[0].sample())
-    assert data_equivalence(space[0:1].sample(), space[0:1].sample())
-    assert data_equivalence(space[0:2].sample(), space[0:2].sample())
+    assert data_equivalence(space[:1].sample(), space[:1].sample())
+    assert data_equivalence(space[:2].sample(), space[:2].sample())
     assert data_equivalence(space[:].sample(), space[:].sample())
     assert data_equivalence(space[:].sample(), space.sample())
 
@@ -45,7 +45,7 @@ def test_multidiscrete_subspace_reproducibility():
 
     assert data_equivalence(space[0, 1].sample(), space[0, 1].sample())
     assert data_equivalence(space[0].sample(), space[0].sample())
-    assert data_equivalence(space[0:1].sample(), space[0:1].sample())
+    assert data_equivalence(space[:1].sample(), space[:1].sample())
     assert data_equivalence(space[0:2, :].sample(), space[0:2, :].sample())
     assert data_equivalence(space[:, 0:1].sample(), space[:, 0:1].sample())
     assert data_equivalence(space[0:2, 0:2].sample(), space[0:2, 0:2].sample())

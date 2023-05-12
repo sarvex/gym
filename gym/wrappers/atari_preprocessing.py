@@ -66,15 +66,14 @@ class AtariPreprocessing(gym.Wrapper):
         assert frame_skip > 0
         assert screen_size > 0
         assert noop_max >= 0
-        if frame_skip > 1:
-            if (
-                "NoFrameskip" not in env.spec.id
-                and getattr(env.unwrapped, "_frameskip", None) != 1
-            ):
-                raise ValueError(
-                    "Disable frame-skipping in the original env. Otherwise, more than one "
-                    "frame-skip will happen as through this wrapper"
-                )
+        if frame_skip > 1 and (
+            "NoFrameskip" not in env.spec.id
+            and getattr(env.unwrapped, "_frameskip", None) != 1
+        ):
+            raise ValueError(
+                "Disable frame-skipping in the original env. Otherwise, more than one "
+                "frame-skip will happen as through this wrapper"
+            )
         self.noop_max = noop_max
         assert env.unwrapped.get_action_meanings()[0] == "NOOP"
 

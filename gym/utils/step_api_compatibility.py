@@ -32,45 +32,44 @@ def convert_to_terminated_truncated_step_api(
     """
     if len(step_returns) == 5:
         return step_returns
-    else:
-        assert len(step_returns) == 4
-        observations, rewards, dones, infos = step_returns
+    assert len(step_returns) == 4
+    observations, rewards, dones, infos = step_returns
 
-        # Cases to handle - info single env /  info vector env (list) / info vector env (dict)
-        if is_vector_env is False:
-            truncated = infos.pop("TimeLimit.truncated", False)
-            return (
-                observations,
-                rewards,
-                dones and not truncated,
-                dones and truncated,
-                infos,
-            )
-        elif isinstance(infos, list):
-            truncated = np.array(
-                [info.pop("TimeLimit.truncated", False) for info in infos]
-            )
-            return (
-                observations,
-                rewards,
-                np.logical_and(dones, np.logical_not(truncated)),
-                np.logical_and(dones, truncated),
-                infos,
-            )
-        elif isinstance(infos, dict):
-            num_envs = len(dones)
-            truncated = infos.pop("TimeLimit.truncated", np.zeros(num_envs, dtype=bool))
-            return (
-                observations,
-                rewards,
-                np.logical_and(dones, np.logical_not(truncated)),
-                np.logical_and(dones, truncated),
-                infos,
-            )
-        else:
-            raise TypeError(
-                f"Unexpected value of infos, as is_vector_envs=False, expects `info` to be a list or dict, actual type: {type(infos)}"
-            )
+    # Cases to handle - info single env /  info vector env (list) / info vector env (dict)
+    if is_vector_env is False:
+        truncated = infos.pop("TimeLimit.truncated", False)
+        return (
+            observations,
+            rewards,
+            dones and not truncated,
+            dones and truncated,
+            infos,
+        )
+    elif isinstance(infos, list):
+        truncated = np.array(
+            [info.pop("TimeLimit.truncated", False) for info in infos]
+        )
+        return (
+            observations,
+            rewards,
+            np.logical_and(dones, np.logical_not(truncated)),
+            np.logical_and(dones, truncated),
+            infos,
+        )
+    elif isinstance(infos, dict):
+        num_envs = len(dones)
+        truncated = infos.pop("TimeLimit.truncated", np.zeros(num_envs, dtype=bool))
+        return (
+            observations,
+            rewards,
+            np.logical_and(dones, np.logical_not(truncated)),
+            np.logical_and(dones, truncated),
+            infos,
+        )
+    else:
+        raise TypeError(
+            f"Unexpected value of infos, as is_vector_envs=False, expects `info` to be a list or dict, actual type: {type(infos)}"
+        )
 
 
 def convert_to_done_step_api(
@@ -85,47 +84,46 @@ def convert_to_done_step_api(
     """
     if len(step_returns) == 4:
         return step_returns
-    else:
-        assert len(step_returns) == 5
-        observations, rewards, terminated, truncated, infos = step_returns
+    assert len(step_returns) == 5
+    observations, rewards, terminated, truncated, infos = step_returns
 
         # Cases to handle - info single env /  info vector env (list) / info vector env (dict)
-        if is_vector_env is False:
-            if truncated or terminated:
-                infos["TimeLimit.truncated"] = truncated and not terminated
-            return (
-                observations,
-                rewards,
-                terminated or truncated,
-                infos,
+    if not is_vector_env:
+        if truncated or terminated:
+            infos["TimeLimit.truncated"] = truncated and not terminated
+        return (
+            observations,
+            rewards,
+            terminated or truncated,
+            infos,
+        )
+    elif isinstance(infos, list):
+        for info, env_truncated, env_terminated in zip(
+            infos, truncated, terminated
+        ):
+            if env_truncated or env_terminated:
+                info["TimeLimit.truncated"] = env_truncated and not env_terminated
+        return (
+            observations,
+            rewards,
+            np.logical_or(terminated, truncated),
+            infos,
+        )
+    elif isinstance(infos, dict):
+        if np.logical_or(np.any(truncated), np.any(terminated)):
+            infos["TimeLimit.truncated"] = np.logical_and(
+                truncated, np.logical_not(terminated)
             )
-        elif isinstance(infos, list):
-            for info, env_truncated, env_terminated in zip(
-                infos, truncated, terminated
-            ):
-                if env_truncated or env_terminated:
-                    info["TimeLimit.truncated"] = env_truncated and not env_terminated
-            return (
-                observations,
-                rewards,
-                np.logical_or(terminated, truncated),
-                infos,
-            )
-        elif isinstance(infos, dict):
-            if np.logical_or(np.any(truncated), np.any(terminated)):
-                infos["TimeLimit.truncated"] = np.logical_and(
-                    truncated, np.logical_not(terminated)
-                )
-            return (
-                observations,
-                rewards,
-                np.logical_or(terminated, truncated),
-                infos,
-            )
-        else:
-            raise TypeError(
-                f"Unexpected value of infos, as is_vector_envs=False, expects `info` to be a list or dict, actual type: {type(infos)}"
-            )
+        return (
+            observations,
+            rewards,
+            np.logical_or(terminated, truncated),
+            infos,
+        )
+    else:
+        raise TypeError(
+            f"Unexpected value of infos, as is_vector_envs=False, expects `info` to be a list or dict, actual type: {type(infos)}"
+        )
 
 
 def step_api_compatibility(

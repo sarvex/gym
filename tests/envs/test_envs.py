@@ -117,31 +117,27 @@ def test_env_determinism_rollout(env_spec: EnvSpec):
 
 def check_rendered(rendered_frame, mode: str):
     """Check that the rendered frame is as expected."""
-    if mode == "rgb_array_list":
+    if mode == "ansi":
+        assert isinstance(rendered_frame, str)
+        assert len(rendered_frame) > 0
+    elif mode == "depth_array":
+        assert isinstance(rendered_frame, np.ndarray)
+        assert len(rendered_frame.shape) == 2
+    elif mode == "depth_array_list":
         assert isinstance(rendered_frame, list)
         for frame in rendered_frame:
-            check_rendered(frame, "rgb_array")
+            check_rendered(frame, "depth_array")
     elif mode == "rgb_array":
         assert isinstance(rendered_frame, np.ndarray)
         assert len(rendered_frame.shape) == 3
         assert rendered_frame.shape[2] == 3
         assert np.all(rendered_frame >= 0) and np.all(rendered_frame <= 255)
-    elif mode == "ansi":
-        assert isinstance(rendered_frame, str)
-        assert len(rendered_frame) > 0
-    elif mode == "state_pixels_list":
+    elif mode in {"rgb_array_list", "state_pixels_list"}:
         assert isinstance(rendered_frame, list)
         for frame in rendered_frame:
             check_rendered(frame, "rgb_array")
     elif mode == "state_pixels":
         check_rendered(rendered_frame, "rgb_array")
-    elif mode == "depth_array_list":
-        assert isinstance(rendered_frame, list)
-        for frame in rendered_frame:
-            check_rendered(frame, "depth_array")
-    elif mode == "depth_array":
-        assert isinstance(rendered_frame, np.ndarray)
-        assert len(rendered_frame.shape) == 2
     else:
         warn(
             f"Unknown render mode: {mode}, cannot check that the rendered data is correct. Add case to `check_rendered`"

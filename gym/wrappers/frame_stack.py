@@ -55,9 +55,7 @@ class LazyFrames:
             The array of stacked frames with dtype
         """
         arr = self[:]
-        if dtype is not None:
-            return arr.astype(dtype)
-        return arr
+        return arr.astype(dtype) if dtype is not None else arr
 
     def __len__(self):
         """Returns the number of frame stacks.

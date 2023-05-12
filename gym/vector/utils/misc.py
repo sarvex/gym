@@ -52,4 +52,4 @@ def clear_mpi_env_vars():
     try:
         yield
     finally:
-        os.environ.update(removed_environment)
+        os.environ |= removed_environment

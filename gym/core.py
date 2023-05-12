@@ -1,4 +1,5 @@
 """Core API for Environment, Wrapper, ActionWrapper, RewardWrapper and ObservationWrapper."""
+
 import sys
 from typing import (
     TYPE_CHECKING,
@@ -22,7 +23,7 @@ from gym.utils import seeding
 if TYPE_CHECKING:
     from gym.envs.registration import EnvSpec
 
-if sys.version_info[0:2] == (3, 6):
+if sys.version_info[:2] == (3, 6):
     warn(
         "Gym minimally supports python 3.6 as the python foundation not longer supports the version, please update your version to 3.7+"
     )
@@ -286,9 +287,7 @@ class Wrapper(Env[ObsType, ActType]):
     @property
     def metadata(self) -> dict:
         """Returns the environment metadata."""
-        if self._metadata is None:
-            return self.env.metadata
-        return self._metadata
+        return self.env.metadata if self._metadata is None else self._metadata
 
     @metadata.setter
     def metadata(self, value):

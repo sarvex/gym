@@ -55,7 +55,7 @@ class VideoRecorder:
 
         self.render_mode = env.render_mode
 
-        if "rgb_array_list" != self.render_mode and "rgb_array" != self.render_mode:
+        if self.render_mode not in ["rgb_array_list", "rgb_array"]:
             logger.warn(
                 f"Disabling video recorder because environment {env} was not initialized with any compatible video "
                 "mode between `rgb_array` and `rgb_array_list`"
@@ -125,14 +125,13 @@ class VideoRecorder:
         if frame is None:
             if self._async:
                 return
-            else:
-                # Indicates a bug in the environment: don't want to raise
-                # an error here.
-                logger.warn(
-                    "Env returned None on `render()`. Disabling further rendering for video recorder by marking as "
-                    f"disabled: path={self.path} metadata_path={self.metadata_path}"
-                )
-                self.broken = True
+            # Indicates a bug in the environment: don't want to raise
+            # an error here.
+            logger.warn(
+                "Env returned None on `render()`. Disabling further rendering for video recorder by marking as "
+                f"disabled: path={self.path} metadata_path={self.metadata_path}"
+            )
+            self.broken = True
         else:
             self.recorded_frames.append(frame)
 

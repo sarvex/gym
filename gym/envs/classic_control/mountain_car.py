@@ -137,9 +137,7 @@ class MountainCarEnv(gym.Env):
         if position == self.min_position and velocity < 0:
             velocity = 0
 
-        terminated = bool(
-            position >= self.goal_position and velocity >= self.goal_velocity
-        )
+        terminated = position >= self.goal_position and velocity >= self.goal_velocity
         reward = -1.0
 
         self.state = (position, velocity)

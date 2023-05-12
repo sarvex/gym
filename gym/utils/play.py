@@ -77,8 +77,7 @@ class PlayableGame:
                     "please specify one manually"
                 )
         assert isinstance(keys_to_action, dict)
-        relevant_keys = set(sum((list(k) for k in keys_to_action.keys()), []))
-        return relevant_keys
+        return set(sum((list(k) for k in keys_to_action.keys()), []))
 
     def _get_video_size(self, zoom: Optional[float] = None) -> Tuple[int, int]:
         rendered = self.env.render()

@@ -30,11 +30,10 @@ def colorize(
     Returns:
         Colourised string
     """
-    attr = []
     num = color2num[color]
     if highlight:
         num += 10
-    attr.append(str(num))
+    attr = [str(num)]
     if bold:
         attr.append("1")
     attrs = ";".join(attr)

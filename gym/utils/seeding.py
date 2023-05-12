@@ -18,7 +18,7 @@ def np_random(seed: Optional[int] = None) -> Tuple[np.random.Generator, Any]:
     Raises:
         Error: Seed must be a non-negative integer or omitted
     """
-    if seed is not None and not (isinstance(seed, int) and 0 <= seed):
+    if seed is not None and not (isinstance(seed, int) and seed >= 0):
         raise error.Error(f"Seed must be a non-negative integer or omitted, not {seed}")
 
     seed_seq = np.random.SeedSequence(seed)

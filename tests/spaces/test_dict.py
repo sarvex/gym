@@ -72,7 +72,7 @@ def test_dict_seeding():
     b_2 = Box(low=-1, high=1, shape=(2,), seed=2)
     c = Discrete(5, seed=3)
 
-    for i in range(10):
+    for _ in range(10):
         dict_sample = DICT_SPACE.sample()
         assert np.all(dict_sample["a"] == a.sample())
         assert np.all(dict_sample["b"]["b_1"] == b_1.sample())
@@ -95,7 +95,7 @@ def test_int_seeding():
     b_2 = Box(low=-1, high=1, shape=(2,), seed=seeds[4])
     c = Discrete(5, seed=seeds[5])
 
-    for i in range(10):
+    for _ in range(10):
         dict_sample = DICT_SPACE.sample()
         assert np.all(dict_sample["a"] == a.sample())
         assert np.all(dict_sample["b"]["b_1"] == b_1.sample())
@@ -137,4 +137,4 @@ def test_iterator():
     for key in DICT_SPACE:
         assert key in DICT_SPACE.spaces
 
-    assert {key for key in DICT_SPACE} == DICT_SPACE.spaces.keys()
+    assert set(DICT_SPACE) == DICT_SPACE.spaces.keys()

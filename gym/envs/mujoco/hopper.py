@@ -25,18 +25,18 @@ class HopperEnv(MuJocoPyEnv, utils.EzPickle):
     def step(self, a):
         posbefore = self.sim.data.qpos[0]
         self.do_simulation(a, self.frame_skip)
-        posafter, height, ang = self.sim.data.qpos[0:3]
+        posafter, height, ang = self.sim.data.qpos[:3]
 
-        alive_bonus = 1.0
         reward = (posafter - posbefore) / self.dt
+        alive_bonus = 1.0
         reward += alive_bonus
         reward -= 1e-3 * np.square(a).sum()
         s = self.state_vector()
-        terminated = not (
-            np.isfinite(s).all()
-            and (np.abs(s[2:]) < 100).all()
-            and (height > 0.7)
-            and (abs(ang) < 0.2)
+        terminated = (
+            not np.isfinite(s).all()
+            or not (np.abs(s[2:]) < 100).all()
+            or height <= 0.7
+            or abs(ang) >= 0.2
         )
         ob = self._get_obs()
 

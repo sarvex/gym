@@ -36,7 +36,7 @@ class InvertedDoublePendulumEnv(MuJocoPyEnv, utils.EzPickle):
         vel_penalty = 1e-3 * v1**2 + 5e-3 * v2**2
         alive_bonus = 10
         r = alive_bonus - dist_penalty - vel_penalty
-        terminated = bool(y <= 1)
+        terminated = y <= 1
 
         if self.render_mode == "human":
             self.render()

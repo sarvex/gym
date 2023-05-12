@@ -57,7 +57,7 @@ def make(
                 if callable(wrappers):
                     env = wrappers(env)
                 elif isinstance(wrappers, Iterable) and all(
-                    [callable(w) for w in wrappers]
+                    callable(w) for w in wrappers
                 ):
                     for wrapper in wrappers:
                         env = wrapper(env)

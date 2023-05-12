@@ -1,4 +1,5 @@
 """Root __init__ of the gym module setting the __all__ of gym modules."""
+
 # isort: skip_file
 
 from gym import error
@@ -34,9 +35,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 try:
     import gym_notices.notices as notices
 
-    # print version warning if necessary
-    notice = notices.notices.get(__version__)
-    if notice:
+    if notice := notices.notices.get(__version__):
         print(notice, file=sys.stderr)
 
 except Exception:  # nosec

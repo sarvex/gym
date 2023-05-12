@@ -71,33 +71,28 @@ class Sequence(Space[Tuple]):
         Returns:
             A tuple of random length with random samples of elements from the :attr:`feature_space`.
         """
-        if mask is not None:
-            length_mask, feature_mask = mask
-        else:
-            length_mask, feature_mask = None, None
-
-        if length_mask is not None:
-            if np.issubdtype(type(length_mask), np.integer):
-                assert (
-                    0 <= length_mask
-                ), f"Expects the length mask to be greater than or equal to zero, actual value: {length_mask}"
-                length = length_mask
-            elif isinstance(length_mask, np.ndarray):
-                assert (
-                    len(length_mask.shape) == 1
-                ), f"Expects the shape of the length mask to be 1-dimensional, actual shape: {length_mask.shape}"
-                assert np.all(
-                    0 <= length_mask
-                ), f"Expects all values in the length_mask to be greater than or equal to zero, actual values: {length_mask}"
-                length = self.np_random.choice(length_mask)
-            else:
-                raise TypeError(
-                    f"Expects the type of length_mask to an integer or a np.ndarray, actual type: {type(length_mask)}"
-                )
-        else:
+        length_mask, feature_mask = mask if mask is not None else (None, None)
+        if length_mask is None:
             # The choice of 0.25 is arbitrary
             length = self.np_random.geometric(0.25)
 
+        elif np.issubdtype(type(length_mask), np.integer):
+            assert (
+                0 <= length_mask
+            ), f"Expects the length mask to be greater than or equal to zero, actual value: {length_mask}"
+            length = length_mask
+        elif isinstance(length_mask, np.ndarray):
+            assert (
+                len(length_mask.shape) == 1
+            ), f"Expects the shape of the length mask to be 1-dimensional, actual shape: {length_mask.shape}"
+            assert np.all(
+                length_mask >= 0
+            ), f"Expects all values in the length_mask to be greater than or equal to zero, actual values: {length_mask}"
+            length = self.np_random.choice(length_mask)
+        else:
+            raise TypeError(
+                f"Expects the type of length_mask to an integer or a np.ndarray, actual type: {type(length_mask)}"
+            )
         return tuple(
             self.feature_space.sample(mask=feature_mask) for _ in range(length)
         )

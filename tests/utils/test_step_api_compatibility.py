@@ -63,13 +63,10 @@ def test_to_done_step_api(
     assert np.all(terminated == expected_terminated)
     assert np.all(truncated == expected_truncated)
 
-    if is_vector_env is False:
+    if is_vector_env is False or not isinstance(info, list):
         assert "TimeLimit.truncated" not in info
-    elif isinstance(info, list):
+    else:
         assert all("TimeLimit.truncated" not in sub_info for sub_info in info)
-    else:  # isinstance(info, dict)
-        assert "TimeLimit.truncated" not in info
-
     roundtripped_returns = convert_to_done_step_api(
         (0, 0, terminated, truncated, info), is_vector_env=is_vector_env
     )
@@ -120,12 +117,23 @@ def test_to_terminated_truncated_step_api(
     )
     assert np.all(done == expected_done)
 
-    if is_vector_env is False:
-        if expected_done:
-            assert info["TimeLimit.truncated"] == expected_truncated
-        else:
-            assert "TimeLimit.truncated" not in info
-    elif isinstance(info, list):
+    if is_vector_env is False and expected_done:
+        assert info["TimeLimit.truncated"] == expected_truncated
+    elif (
+        is_vector_env is False
+        and not expected_done
+        or is_vector_env is not False
+        and not isinstance(info, list)
+        and not np.any(expected_done)
+    ):
+        assert "TimeLimit.truncated" not in info
+    elif (
+        is_vector_env is not False
+        and not isinstance(info, list)
+        and np.any(expected_done)
+    ):
+        assert np.all(info["TimeLimit.truncated"] == expected_truncated)
+    else:
         for sub_info, env_done, env_truncated in zip(
             info, expected_done, expected_truncated
         ):
@@ -133,12 +141,6 @@ def test_to_terminated_truncated_step_api(
                 assert sub_info["TimeLimit.truncated"] == env_truncated
             else:
                 assert "TimeLimit.truncated" not in sub_info
-    else:  # isinstance(info, dict)
-        if np.any(expected_done):
-            assert np.all(info["TimeLimit.truncated"] == expected_truncated)
-        else:
-            assert "TimeLimit.truncated" not in info
-
     roundtripped_returns = convert_to_terminated_truncated_step_api(
         (0, 0, done, info), is_vector_env=is_vector_env
     )

@@ -59,8 +59,7 @@ def load(name: str) -> callable:
     """
     mod_name, attr_name = name.split(":")
     mod = importlib.import_module(mod_name)
-    fn = getattr(mod, attr_name)
-    return fn
+    return getattr(mod, attr_name)
 
 
 def parse_env_id(id: str) -> Tuple[Optional[str], str, Optional[int]]:
@@ -110,7 +109,7 @@ def get_env_id(ns: Optional[str], name: str, version: Optional[int]) -> str:
     if version is not None:
         full_name += f"-v{version}"
     if ns is not None:
-        full_name = ns + "/" + full_name
+        full_name = f"{ns}/{full_name}"
     return full_name
 
 
@@ -171,7 +170,7 @@ def _check_namespace_exists(ns: Optional[str]):
         return
 
     suggestion = (
-        difflib.get_close_matches(ns, namespaces, n=1) if len(namespaces) > 0 else None
+        difflib.get_close_matches(ns, namespaces, n=1) if namespaces else None
     )
     suggestion_msg = (
         f"Did you mean: `{suggestion[0]}`?"
@@ -229,9 +228,7 @@ def _check_version_exists(ns: Optional[str], name: str, version: Optional[int]):
     ]
     env_specs = sorted(env_specs, key=lambda spec_: int(spec_.version or -1))
 
-    default_spec = [spec_ for spec_ in env_specs if spec_.version is None]
-
-    if default_spec:
+    if default_spec := [spec_ for spec_ in env_specs if spec_.version is None]:
         message += f" It provides the default version {default_spec[0].id}`."
         if len(env_specs) == 1:
             raise error.DeprecatedEnv(message)
@@ -293,7 +290,7 @@ def load_env_plugins(entry_point: str = "gym.envs") -> None:
             # the root namespace had an allow-list. The allow-list is now
             # removed and plugins can register environments in the root
             # namespace with the `__root__` magic key.
-            if plugin.name == "__root__" or plugin.name == "__internal__":
+            if plugin.name in ["__root__", "__internal__"]:
                 context = contextlib.nullcontext()
             else:
                 logger.warn(
@@ -640,7 +637,7 @@ def make(
         env = env_creator(**_kwargs)
     except TypeError as e:
         if (
-            str(e).find("got an unexpected keyword argument 'render_mode'") >= 0
+            "got an unexpected keyword argument 'render_mode'" in str(e)
             and apply_human_rendering
         ):
             raise error.Error(

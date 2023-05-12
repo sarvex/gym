@@ -139,20 +139,20 @@ def check_reset_options(env: gym.Env):
             even though `options` or `kwargs` appear in the signature.
     """
     signature = inspect.signature(env.reset)
-    if "options" in signature.parameters or (
-        "kwargs" in signature.parameters
-        and signature.parameters["kwargs"].kind is inspect.Parameter.VAR_KEYWORD
+    if "options" not in signature.parameters and (
+        "kwargs" not in signature.parameters
+        or signature.parameters["kwargs"].kind
+        is not inspect.Parameter.VAR_KEYWORD
     ):
-        try:
-            env.reset(options={})
-        except TypeError as e:
-            raise AssertionError(
-                "The environment cannot be reset with options, even though `options` or `**kwargs` appear in the signature. "
-                f"This should never happen, please report this issue. The error was: {e}"
-            )
-    else:
         raise gym.error.Error(
             "The `reset` method does not provide an `options` or `**kwargs` keyword argument."
+        )
+    try:
+        env.reset(options={})
+    except TypeError as e:
+        raise AssertionError(
+            "The environment cannot be reset with options, even though `options` or `**kwargs` appear in the signature. "
+            f"This should never happen, please report this issue. The error was: {e}"
         )
 
 
@@ -227,23 +227,25 @@ def check_space_limit(space, space_type: str):
             )
 
         # Check that the Box space is normalized
-        if space_type == "action":
-            if len(space.shape) == 1:  # for vector boxes
-                if (
-                    np.any(
-                        np.logical_and(
-                            space.low != np.zeros_like(space.low),
-                            np.abs(space.low) != np.abs(space.high),
-                        )
+        if (
+            space_type == "action"
+            and len(space.shape) == 1
+            and (
+                np.any(
+                    np.logical_and(
+                        space.low != np.zeros_like(space.low),
+                        np.abs(space.low) != np.abs(space.high),
                     )
-                    or np.any(space.low < -1)
-                    or np.any(space.high > 1)
-                ):
-                    # todo - Add to gymlibrary.ml?
-                    logger.warn(
-                        "For Box action spaces, we recommend using a symmetric and normalized space (range=[-1, 1] or [0, 1]). "
-                        "See https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html for more information."
-                    )
+                )
+                or np.any(space.low < -1)
+                or np.any(space.high > 1)
+            )
+        ):
+            # todo - Add to gymlibrary.ml?
+            logger.warn(
+                "For Box action spaces, we recommend using a symmetric and normalized space (range=[-1, 1] or [0, 1]). "
+                "See https://stable-baselines3.readthedocs.io/en/master/guide/rl_tips.html for more information."
+            )
     elif isinstance(space, spaces.Tuple):
         for subspace in space.spaces:
             check_space_limit(subspace, space_type)
@@ -303,8 +305,7 @@ def check_env(env: gym.Env, warn: bool = None, skip_render_check: bool = False):
     env_step_passive_checker(env, env.action_space.sample())
 
     # ==== Check the render method and the declared render modes ====
-    if not skip_render_check:
-        if env.render_mode is not None:
-            env_render_passive_checker(env)
+    if not skip_render_check and env.render_mode is not None:
+        env_render_passive_checker(env)
 
         # todo: recreate the environment with a different render_mode for check that each work

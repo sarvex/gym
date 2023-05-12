@@ -99,9 +99,8 @@ class RecordVideo(gym.Wrapper):
             self.video_recorder.frames = []
             self.video_recorder.capture_frame()
             self.recorded_frames += 1
-            if self.video_length > 0:
-                if self.recorded_frames > self.video_length:
-                    self.close_video_recorder()
+            if self.video_length > 0 and self.recorded_frames > self.video_length:
+                self.close_video_recorder()
         elif self._video_enabled():
             self.start_video_recorder()
         return observations
@@ -141,7 +140,7 @@ class RecordVideo(gym.Wrapper):
             infos,
         ) = self.env.step(action)
 
-        if not (self.terminated or self.truncated):
+        if not self.terminated and not self.truncated:
             # increment steps and episodes
             self.step_id += 1
             if not self.is_vector_env:
@@ -161,13 +160,13 @@ class RecordVideo(gym.Wrapper):
                 if self.video_length > 0:
                     if self.recorded_frames > self.video_length:
                         self.close_video_recorder()
-                else:
-                    if not self.is_vector_env:
-                        if terminateds or truncateds:
-                            self.close_video_recorder()
-                    elif terminateds[0] or truncateds[0]:
-                        self.close_video_recorder()
-
+                elif (
+                    not self.is_vector_env
+                    and (terminateds or truncateds)
+                    or self.is_vector_env
+                    and (terminateds[0] or truncateds[0])
+                ):
+                    self.close_video_recorder()
             elif self._video_enabled():
                 self.start_video_recorder()
 
@@ -186,20 +185,20 @@ class RecordVideo(gym.Wrapper):
         if self.video_recorder is None or not self.video_recorder.enabled:
             return super().render(*args, **kwargs)
 
-        if len(self.video_recorder.render_history) > 0:
-            recorded_frames = [
-                self.video_recorder.render_history.pop()
-                for _ in range(len(self.video_recorder.render_history))
-            ]
-            if self.recording:
-                return recorded_frames
-            else:
-                return recorded_frames + super().render(*args, **kwargs)
+        if len(self.video_recorder.render_history) <= 0:
+            return (
+                self.video_recorder.last_frame
+                if self.recording
+                else super().render(*args, **kwargs)
+            )
+        recorded_frames = [
+            self.video_recorder.render_history.pop()
+            for _ in range(len(self.video_recorder.render_history))
+        ]
+        if self.recording:
+            return recorded_frames
         else:
-            if self.recording:
-                return self.video_recorder.last_frame
-            else:
-                return super().render(*args, **kwargs)
+            return recorded_frames + super().render(*args, **kwargs)
 
     def close(self):
         """Closes the wrapper then the video recorder."""

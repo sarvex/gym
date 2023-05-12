@@ -232,7 +232,7 @@ class PendulumEnv(gym.Env):
                 img,
                 (scale * np.abs(self.last_u) / 2, scale * np.abs(self.last_u) / 2),
             )
-            is_flip = bool(self.last_u > 0)
+            is_flip = self.last_u > 0
             scale_img = pygame.transform.flip(scale_img, is_flip, True)
             self.surf.blit(
                 scale_img,
@@ -248,15 +248,13 @@ class PendulumEnv(gym.Env):
 
         self.surf = pygame.transform.flip(self.surf, False, True)
         self.screen.blit(self.surf, (0, 0))
-        if self.render_mode == "human":
-            pygame.event.pump()
-            self.clock.tick(self.metadata["render_fps"])
-            pygame.display.flip()
-
-        else:  # mode == "rgb_array":
+        if self.render_mode != "human":
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(self.screen)), axes=(1, 0, 2)
             )
+        pygame.event.pump()
+        self.clock.tick(self.metadata["render_fps"])
+        pygame.display.flip()
 
     def close(self):
         if self.screen is not None:

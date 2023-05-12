@@ -232,7 +232,7 @@ class AcrobotEnv(core.Env):
     def _terminal(self):
         s = self.state
         assert s is not None, "Call reset before using AcrobotEnv object."
-        return bool(-cos(s[0]) - cos(s[1] + s[0]) > 1.0)
+        return -cos(s[0]) - cos(s[1] + s[0]) > 1.0
 
     def _dsdt(self, s_augmented):
         m1 = self.LINK_MASS_1

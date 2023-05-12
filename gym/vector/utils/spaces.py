@@ -199,7 +199,7 @@ def _iterate_dict(space, items):
         ]
     )
     for item in zip(*values):
-        yield OrderedDict([(key, value) for (key, value) in zip(keys, item)])
+        yield OrderedDict(list(zip(keys, item)))
 
 
 @iterate.register(Space)

@@ -17,9 +17,9 @@ def test_concatenate(space):
         # Special case: if rhs is a list of scalars, lhs must be an np.ndarray
         if np.isscalar(rhs[0]):
             assert isinstance(lhs, np.ndarray)
-            assert all([np.isscalar(rhs[i]) for i in range(n)])
+            assert all(np.isscalar(rhs[i]) for i in range(n))
         else:
-            assert all([isinstance(rhs[i], type(lhs)) for i in range(n)])
+            assert all(isinstance(rhs[i], type(lhs)) for i in range(n))
 
     def assert_nested_equal(lhs, rhs, n):
         assert isinstance(rhs, list)

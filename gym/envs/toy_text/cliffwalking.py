@@ -256,14 +256,13 @@ class CliffWalkingEnv(Env):
                 last_action = self.lastaction if self.lastaction is not None else 2
                 self.window_surface.blit(self.elf_images[last_action], elf_pos)
 
-        if mode == "human":
-            pygame.event.pump()
-            pygame.display.update()
-            self.clock.tick(self.metadata["render_fps"])
-        else:  # rgb_array
+        if mode != "human":
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(self.window_surface)), axes=(1, 0, 2)
             )
+        pygame.event.pump()
+        pygame.display.update()
+        self.clock.tick(self.metadata["render_fps"])
 
     def _render_text(self):
         outfile = StringIO()

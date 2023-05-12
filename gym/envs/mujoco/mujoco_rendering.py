@@ -202,13 +202,9 @@ class RenderContext:
                 else:
                     g.label = value
             elif hasattr(g, key):
-                raise ValueError(
-                    "mjtGeom has attr {} but type {} is invalid".format(
-                        key, type(value)
-                    )
-                )
+                raise ValueError(f"mjtGeom has attr {key} but type {type(value)} is invalid")
             else:
-                raise ValueError("mjtGeom doesn't have field %s" % key)
+                raise ValueError(f"mjtGeom doesn't have field {key}")
 
         self.scn.ngeom += 1
 
@@ -463,7 +459,7 @@ class Viewer(RenderContext):
         self.add_overlay(topleft, "[H]ide Menu", "")
         if self._image_idx > 0:
             fname = self._image_path % (self._image_idx - 1)
-            self.add_overlay(topleft, "Cap[t]ure frame", "Saved as %s" % fname)
+            self.add_overlay(topleft, "Cap[t]ure frame", f"Saved as {fname}")
         else:
             self.add_overlay(topleft, "Cap[t]ure frame", "")
         self.add_overlay(topleft, "Toggle geomgroup visibility", "0-4")

@@ -115,12 +115,12 @@ def test_atari_preprocessing_scale(grayscale, scaled, max_test_steps=10):
     obs, _ = env.reset()
 
     max_obs = 1 if scaled else 255
-    assert np.all(0 <= obs) and np.all(obs <= max_obs)
+    assert np.all(obs >= 0) and np.all(obs <= max_obs)
 
     terminated, truncated, step_i = False, False, 0
-    while not (terminated or truncated) and step_i <= max_test_steps:
+    while not terminated and not truncated and step_i <= max_test_steps:
         obs, _, terminated, truncated, _ = env.step(env.action_space.sample())
-        assert np.all(0 <= obs) and np.all(obs <= max_obs)
+        assert np.all(obs >= 0) and np.all(obs <= max_obs)
 
         step_i += 1
     env.close()

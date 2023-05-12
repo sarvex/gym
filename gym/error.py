@@ -99,11 +99,10 @@ class APIError(Error):
 
     def __unicode__(self):
         """Returns a string, if request_id is not None then make message other use the _message."""
-        if self.request_id is not None:
-            msg = self._message or "<empty message>"
-            return f"Request {self.request_id}: {msg}"
-        else:
+        if self.request_id is None:
             return self._message
+        msg = self._message or "<empty message>"
+        return f"Request {self.request_id}: {msg}"
 
     def __str__(self):
         """Returns the __unicode__."""

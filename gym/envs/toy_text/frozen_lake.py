@@ -35,7 +35,7 @@ def is_valid(board: List[List[str]], max_size: int) -> bool:
     frontier.append((0, 0))
     while frontier:
         r, c = frontier.pop()
-        if not (r, c) in discovered:
+        if (r, c) not in discovered:
             discovered.add((r, c))
             directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
             for x, y in directions:
@@ -166,10 +166,8 @@ class FrozenLakeEnv(Env):
         map_name="4x4",
         is_slippery=True,
     ):
-        if desc is None and map_name is None:
-            desc = generate_random_map()
-        elif desc is None:
-            desc = MAPS[map_name]
+        if desc is None:
+            desc = generate_random_map() if map_name is None else MAPS[map_name]
         self.desc = desc = np.asarray(desc, dtype="c")
         self.nrow, self.ncol = nrow, ncol = desc.shape
         self.reward_range = (0, 1)

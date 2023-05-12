@@ -89,8 +89,8 @@ class Car:
             (+WHEEL_W, -WHEEL_R),
             (-WHEEL_W, -WHEEL_R),
         ]
+        front_k = 1.0
         for wx, wy in WHEELPOS:
-            front_k = 1.0 if wy > 0 else 1.0
             w = self.world.CreateDynamicBody(
                 position=(init_x + wx * SIZE, init_y + wy * SIZE),
                 angle=init_angle,
@@ -144,8 +144,7 @@ class Car:
         gas = np.clip(gas, 0, 1)
         for w in self.wheels[2:4]:
             diff = gas - w.gas
-            if diff > 0.1:
-                diff = 0.1  # gradually increase, but stop immediately
+            diff = min(diff, 0.1)
             w.gas += diff
 
     def brake(self, b):
@@ -302,9 +301,9 @@ class Car:
                 s2 = math.sin(a2)
                 c1 = math.cos(a1)
                 c2 = math.cos(a2)
-                if s1 > 0 and s2 > 0:
-                    continue
                 if s1 > 0:
+                    if s2 > 0:
+                        continue
                     c1 = np.sign(c1)
                 if s2 > 0:
                     c2 = np.sign(c2)

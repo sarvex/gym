@@ -219,14 +219,14 @@ class SyncVectorEnv(VectorEnv):
 
     def _check_spaces(self) -> bool:
         for env in self.envs:
-            if not (env.observation_space == self.single_observation_space):
+            if env.observation_space != self.single_observation_space:
                 raise RuntimeError(
                     "Some environments have an observation space different from "
                     f"`{self.single_observation_space}`. In order to batch observations, "
                     "the observation spaces from all environments must be equal."
                 )
 
-            if not (env.action_space == self.single_action_space):
+            if env.action_space != self.single_action_space:
                 raise RuntimeError(
                     "Some environments have an action space different from "
                     f"`{self.single_action_space}`. In order to batch actions, the "

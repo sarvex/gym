@@ -48,8 +48,9 @@ class FilterObservation(gym.ObservationWrapper):
         if filter_keys is None:
             filter_keys = tuple(observation_keys)
 
-        missing_keys = {key for key in filter_keys if key not in observation_keys}
-        if missing_keys:
+        if missing_keys := {
+            key for key in filter_keys if key not in observation_keys
+        }:
             raise ValueError(
                 "All the filter_keys must be included in the original observation space.\n"
                 f"Filter keys: {filter_keys}\n"
@@ -77,8 +78,7 @@ class FilterObservation(gym.ObservationWrapper):
         Returns:
             The filtered observations
         """
-        filter_observation = self._filter_observation(observation)
-        return filter_observation
+        return self._filter_observation(observation)
 
     def _filter_observation(self, observation):
         observation = type(observation)(

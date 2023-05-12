@@ -56,7 +56,7 @@ class HumanoidEnv(MuJocoPyEnv, utils.EzPickle):
         quad_impact_cost = min(quad_impact_cost, 10)
         reward = lin_vel_cost - quad_ctrl_cost - quad_impact_cost + alive_bonus
         qpos = self.sim.data.qpos
-        terminated = bool((qpos[2] < 1.0) or (qpos[2] > 2.0))
+        terminated = qpos[2] < 1.0 or qpos[2] > 2.0
 
         if self.render_mode == "human":
             self.render()

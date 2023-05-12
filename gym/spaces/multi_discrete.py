@@ -77,50 +77,48 @@ class MultiDiscrete(Space[np.ndarray]):
         Returns:
             An `np.ndarray` of shape `space.shape`
         """
-        if mask is not None:
+        if mask is None:
+            return (self.np_random.random(self.nvec.shape) * self.nvec).astype(self.dtype)
+        def _apply_mask(
+            sub_mask: Union[np.ndarray, tuple],
+            sub_nvec: Union[np.ndarray, np.integer],
+        ) -> Union[int, List[int]]:
+            if isinstance(sub_nvec, np.ndarray):
+                assert isinstance(
+                    sub_mask, tuple
+                ), f"Expects the mask to be a tuple for sub_nvec ({sub_nvec}), actual type: {type(sub_mask)}"
+                assert len(sub_mask) == len(
+                    sub_nvec
+                ), f"Expects the mask length to be equal to the number of actions, mask length: {len(sub_mask)}, nvec length: {len(sub_nvec)}"
+                return [
+                    _apply_mask(new_mask, new_nvec)
+                    for new_mask, new_nvec in zip(sub_mask, sub_nvec)
+                ]
+            else:
+                assert np.issubdtype(
+                    type(sub_nvec), np.integer
+                ), f"Expects the sub_nvec to be an action, actually: {sub_nvec}, {type(sub_nvec)}"
+                assert isinstance(
+                    sub_mask, np.ndarray
+                ), f"Expects the sub mask to be np.ndarray, actual type: {type(sub_mask)}"
+                assert (
+                    len(sub_mask) == sub_nvec
+                ), f"Expects the mask length to be equal to the number of actions, mask length: {len(sub_mask)}, action: {sub_nvec}"
+                assert (
+                    sub_mask.dtype == np.int8
+                ), f"Expects the mask dtype to be np.int8, actual dtype: {sub_mask.dtype}"
 
-            def _apply_mask(
-                sub_mask: Union[np.ndarray, tuple],
-                sub_nvec: Union[np.ndarray, np.integer],
-            ) -> Union[int, List[int]]:
-                if isinstance(sub_nvec, np.ndarray):
-                    assert isinstance(
-                        sub_mask, tuple
-                    ), f"Expects the mask to be a tuple for sub_nvec ({sub_nvec}), actual type: {type(sub_mask)}"
-                    assert len(sub_mask) == len(
-                        sub_nvec
-                    ), f"Expects the mask length to be equal to the number of actions, mask length: {len(sub_mask)}, nvec length: {len(sub_nvec)}"
-                    return [
-                        _apply_mask(new_mask, new_nvec)
-                        for new_mask, new_nvec in zip(sub_mask, sub_nvec)
-                    ]
+                valid_action_mask = sub_mask == 1
+                assert np.all(
+                    np.logical_or(sub_mask == 0, valid_action_mask)
+                ), f"Expects all masks values to 0 or 1, actual values: {sub_mask}"
+
+                if np.any(valid_action_mask):
+                    return self.np_random.choice(np.where(valid_action_mask)[0])
                 else:
-                    assert np.issubdtype(
-                        type(sub_nvec), np.integer
-                    ), f"Expects the sub_nvec to be an action, actually: {sub_nvec}, {type(sub_nvec)}"
-                    assert isinstance(
-                        sub_mask, np.ndarray
-                    ), f"Expects the sub mask to be np.ndarray, actual type: {type(sub_mask)}"
-                    assert (
-                        len(sub_mask) == sub_nvec
-                    ), f"Expects the mask length to be equal to the number of actions, mask length: {len(sub_mask)}, action: {sub_nvec}"
-                    assert (
-                        sub_mask.dtype == np.int8
-                    ), f"Expects the mask dtype to be np.int8, actual dtype: {sub_mask.dtype}"
+                    return 0
 
-                    valid_action_mask = sub_mask == 1
-                    assert np.all(
-                        np.logical_or(sub_mask == 0, valid_action_mask)
-                    ), f"Expects all masks values to 0 or 1, actual values: {sub_mask}"
-
-                    if np.any(valid_action_mask):
-                        return self.np_random.choice(np.where(valid_action_mask)[0])
-                    else:
-                        return 0
-
-            return np.array(_apply_mask(mask, self.nvec), dtype=self.dtype)
-
-        return (self.np_random.random(self.nvec.shape) * self.nvec).astype(self.dtype)
+        return np.array(_apply_mask(mask, self.nvec), dtype=self.dtype)
 
     def contains(self, x) -> bool:
         """Return boolean specifying if x is a valid member of this space."""
@@ -133,7 +131,7 @@ class MultiDiscrete(Space[np.ndarray]):
             isinstance(x, np.ndarray)
             and x.shape == self.shape
             and x.dtype != object
-            and np.all(0 <= x)
+            and np.all(x >= 0)
             and np.all(x < self.nvec)
         )
 

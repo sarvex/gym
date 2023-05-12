@@ -54,8 +54,8 @@ class Text(Space[str]):
             min_length <= max_length
         ), f"The min_length must be less than or equal to the max_length, min_length: {min_length}, max_length: {max_length}"
 
-        self.min_length: int = int(min_length)
-        self.max_length: int = int(max_length)
+        self.min_length: int = min_length
+        self.max_length: int = max_length
 
         self._char_set: FrozenSet[str] = frozenset(charset)
         self._char_list: Tuple[str, ...] = tuple(charset)
@@ -140,9 +140,8 @@ class Text(Space[str]):
 
     def contains(self, x: Any) -> bool:
         """Return boolean specifying if x is a valid member of this space."""
-        if isinstance(x, str):
-            if self.min_length <= len(x) <= self.max_length:
-                return all(c in self.character_set for c in x)
+        if isinstance(x, str) and self.min_length <= len(x) <= self.max_length:
+            return all(c in self.character_set for c in x)
         return False
 
     def __repr__(self) -> str:

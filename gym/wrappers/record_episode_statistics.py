@@ -29,7 +29,7 @@ def add_vector_episode_statistics(
     info["_episode"] = info.get("_episode", np.zeros(num_envs, dtype=bool))
     info["_episode"][env_num] = True
 
-    for k in episode_info.keys():
+    for k in episode_info:
         info_array = info["episode"].get(k, np.zeros(num_envs))
         info_array[env_num] = episode_info[k]
         info["episode"][k] = info_array

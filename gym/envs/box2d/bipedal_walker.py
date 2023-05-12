@@ -83,10 +83,7 @@ class ContactDetector(contactListener):
         self.env = env
 
     def BeginContact(self, contact):
-        if (
-            self.env.hull == contact.fixtureA.body
-            or self.env.hull == contact.fixtureB.body
-        ):
+        if self.env.hull in [contact.fixtureA.body, contact.fixtureB.body]:
             self.env.game_over = True
         for leg in [self.env.legs[1], self.env.legs[3]]:
             if leg in [contact.fixtureA.body, contact.fixtureB.body]:
@@ -319,7 +316,7 @@ class BipedalWalker(gym.Env, EzPickle):
                 counter += 2
                 original_y = y
 
-            elif state == PIT and not oneshot:
+            elif state == PIT:
                 y = original_y
                 if counter > 1:
                     y -= 4 * TERRAIN_STEP
@@ -367,7 +364,7 @@ class BipedalWalker(gym.Env, EzPickle):
                     self.terrain.append(t)
                 counter = stair_steps * stair_width
 
-            elif state == STAIRS and not oneshot:
+            elif state == STAIRS:
                 s = stair_steps * stair_width - counter - stair_height
                 n = s / stair_width
                 y = original_y + (n * stair_height) * TERRAIN_STEP
@@ -379,11 +376,9 @@ class BipedalWalker(gym.Env, EzPickle):
                 counter = self.np_random.integers(TERRAIN_GRASS / 2, TERRAIN_GRASS)
                 if state == GRASS and hardcore:
                     state = self.np_random.integers(1, _STATES_)
-                    oneshot = True
                 else:
                     state = GRASS
-                    oneshot = True
-
+                oneshot = True
         self.terrain_poly = []
         for i in range(TERRAIN_LENGTH - 1):
             poly = [
@@ -404,7 +399,7 @@ class BipedalWalker(gym.Env, EzPickle):
     def _generate_clouds(self):
         # Sorry for the clouds, couldn't resist
         self.cloud_poly = []
-        for i in range(TERRAIN_LENGTH // 20):
+        for _ in range(TERRAIN_LENGTH // 20):
             x = self.np_random.uniform(0, TERRAIN_LENGTH) * TERRAIN_STEP
             y = VIEWPORT_H / SCALE * 3 / 4
             poly = [
@@ -668,9 +663,7 @@ class BipedalWalker(gym.Env, EzPickle):
                 continue
             if poly[0][0] > self.scroll + VIEWPORT_W / SCALE:
                 continue
-            scaled_poly = []
-            for coord in poly:
-                scaled_poly.append([coord[0] * SCALE, coord[1] * SCALE])
+            scaled_poly = [[coord[0] * SCALE, coord[1] * SCALE] for coord in poly]
             pygame.draw.polygon(self.surf, color=color, points=scaled_poly)
             gfxdraw.aapolygon(self.surf, scaled_poly, color)
 
@@ -793,9 +786,9 @@ if __name__ == "__main__":
         if steps % 20 == 0 or terminated or truncated:
             print("\naction " + str([f"{x:+0.2f}" for x in a]))
             print(f"step {steps} total_reward {total_reward:+0.2f}")
-            print("hull " + str([f"{x:+0.2f}" for x in s[0:4]]))
-            print("leg0 " + str([f"{x:+0.2f}" for x in s[4:9]]))
-            print("leg1 " + str([f"{x:+0.2f}" for x in s[9:14]]))
+            print(f'hull {[f"{x:+0.2f}" for x in s[:4]]}')
+            print(f'leg0 {[f"{x:+0.2f}" for x in s[4:9]]}')
+            print(f'leg1 {[f"{x:+0.2f}" for x in s[9:14]]}')
         steps += 1
 
         contact0 = s[8]

@@ -25,13 +25,13 @@ class Walker2dEnv(MuJocoPyEnv, utils.EzPickle):
     def step(self, a):
         posbefore = self.sim.data.qpos[0]
         self.do_simulation(a, self.frame_skip)
-        posafter, height, ang = self.sim.data.qpos[0:3]
+        posafter, height, ang = self.sim.data.qpos[:3]
 
         alive_bonus = 1.0
         reward = (posafter - posbefore) / self.dt
         reward += alive_bonus
         reward -= 1e-3 * np.square(a).sum()
-        terminated = not (height > 0.8 and height < 2.0 and ang > -1.0 and ang < 1.0)
+        terminated = height <= 0.8 or height >= 2.0 or ang <= -1.0 or ang >= 1.0
         ob = self._get_obs()
 
         if self.render_mode == "human":

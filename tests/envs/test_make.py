@@ -114,7 +114,7 @@ def test_make_disable_env_checker():
     env.close()
 
     # Test with overwritten spec using make disable env checker
-    assert spec.disable_env_checker is False
+    assert not spec.disable_env_checker
     env = gym.make(spec, disable_env_checker=True)
     assert has_wrapper(env, PassiveEnvChecker) is False
     env.close()
@@ -126,7 +126,7 @@ def test_make_disable_env_checker():
     env.close()
 
     # Test with overwritten spec using make disable env checker
-    assert spec.disable_env_checker is True
+    assert spec.disable_env_checker
     env = gym.make(spec, disable_env_checker=False)
     assert has_wrapper(env, PassiveEnvChecker)
     env.close()

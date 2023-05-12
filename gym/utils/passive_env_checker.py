@@ -89,11 +89,11 @@ def check_space(
             space.shape == space.nvec.shape
         ), f"Multi-discrete {space_type} space's shape must be equal to the nvec shape, space shape: {space.shape}, nvec shape: {space.nvec.shape}"
         assert np.all(
-            0 < space.nvec
+            space.nvec > 0
         ), f"Multi-discrete {space_type} space's all nvec elements must be greater than 0, actual nvec: {space.nvec}"
     elif isinstance(space, spaces.MultiBinary):
         assert np.all(
-            0 < np.asarray(space.shape)
+            np.asarray(space.shape) > 0
         ), f"Multi-binary {space_type} space's all shape elements must be greater than 0, actual shape: {space.shape}"
     elif isinstance(space, spaces.Tuple):
         assert 0 < len(
@@ -289,19 +289,17 @@ def env_render_passive_checker(env, *args, **kwargs):
                 logger.warn(
                     "No render fps was declared in the environment (env.metadata['render_fps'] is None or not defined), rendering may occur at inconsistent fps."
                 )
-            else:
-                if not (
-                    np.issubdtype(type(render_fps), np.integer)
-                    or np.issubdtype(type(render_fps), np.floating)
-                ):
-                    logger.warn(
-                        f"Expects the `env.metadata['render_fps']` to be an integer or a float, actual type: {type(render_fps)}"
-                    )
-                else:
-                    assert (
-                        render_fps > 0
-                    ), f"Expects the `env.metadata['render_fps']` to be greater than zero, actual value: {render_fps}"
+            elif np.issubdtype(type(render_fps), np.integer) or np.issubdtype(
+                type(render_fps), np.floating
+            ):
+                assert (
+                    render_fps > 0
+                ), f"Expects the `env.metadata['render_fps']` to be greater than zero, actual value: {render_fps}"
 
+            else:
+                logger.warn(
+                    f"Expects the `env.metadata['render_fps']` to be an integer or a float, actual type: {type(render_fps)}"
+                )
         # env.render is now an attribute with default None
         if len(render_modes) == 0:
             assert (
@@ -313,8 +311,4 @@ def env_render_passive_checker(env, *args, **kwargs):
                 f"Render mode: {env.render_mode}, modes: {render_modes}"
             )
 
-    result = env.render(*args, **kwargs)
-
-    # TODO: Check that the result is correct
-
-    return result
+    return env.render(*args, **kwargs)

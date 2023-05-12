@@ -222,7 +222,7 @@ class VectorEnv(gym.Env):
             infos (dict): the (updated) infos of the vectorized environment
 
         """
-        for k in info.keys():
+        for k in info:
             if k not in infos:
                 info_array, array_mask = self._init_info_arrays(type(info[k]))
             else:
